@@ -160,7 +160,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericBar :: (Generic a, Generic b, Generic (m b)) => Generic (Bar a b m c)"
+              , "derive instance genericBar :: Generic (Bar a b m c)"
               , "--------------------------------------------------------------------------------"
               , "_Bar1 :: forall a b m c. Prism' (Bar a b m c) (Maybe a)"
               , "_Bar1 = prism' Bar1 f"
@@ -282,7 +282,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericSingleRecord :: (Generic a, Generic b) => Generic (SingleRecord a b)"
+              , "derive instance genericSingleRecord :: Generic (SingleRecord a b)"
               , "derive instance newtypeSingleRecord :: Newtype (SingleRecord a b) _"
               , "--------------------------------------------------------------------------------"
               , "_SingleRecord :: forall a b. Iso' (SingleRecord a b) { _a :: a"
@@ -418,7 +418,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericBar :: (Generic a, Generic b, Generic (m b)) => Generic (Bar a b m c)"
+              , "derive instance genericBar :: Generic (Bar a b m c)"
               ]
        in m `shouldBe` txt
     it "tests generation of newtypes for record data type" $
@@ -437,7 +437,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericSingleRecord :: (Generic a, Generic b) => Generic (SingleRecord a b)"
+              , "derive instance genericSingleRecord :: Generic (SingleRecord a b)"
               , "derive instance newtypeSingleRecord :: Newtype (SingleRecord a b) _"
               ]
        in recTypeText `shouldRender` txt
@@ -491,12 +491,12 @@ allTests = do
        in recTypeText `shouldRender` txt
   describe "buildBridge without lens-code-gen and generics-rep" $ do
     let settings = getSettings (noLenses <> useGenRep)
-    it "tests generation of for custom type Foo" $
+    it "tests generation of typeclasses for custom type Foo" $
       let proxy = Proxy :: Proxy Foo
           recType =
             bridgeSumType
               (buildBridge defaultBridge)
-              (order proxy $ mkSumType proxy)
+              (genericShow proxy $ order proxy $ mkSumType proxy)
           recTypeText = sumTypeToDoc settings recType
           txt =
             T.unlines
@@ -506,9 +506,30 @@ allTests = do
               , "  | FooBar Int String"
               , ""
               , ""
+              , "instance showFoo :: Show Foo where"
+              , "  show x = genericShow x"
               , "derive instance eqFoo :: Eq Foo"
               , "derive instance ordFoo :: Ord Foo"
               , "derive instance genericFoo :: Generic Foo _"
+              ]
+       in recTypeText `shouldRender` txt
+    it "tests generation of typeclasses for custom type Func" $
+      let proxy = Proxy :: Proxy (Func A)
+          recType =
+            bridgeSumType
+              (buildBridge defaultBridge)
+              (functor proxy $ genericShow proxy $ mkSumType proxy)
+          recTypeText = sumTypeToDoc settings recType
+          txt =
+            T.unlines
+              [ "data Func a"
+              , "  = Func Int a"
+              , ""
+              , ""
+              , "derive instance functorFunc :: Functor Func"
+              , "instance showFunc :: (Show a) => Show (Func a) where"
+              , "  show x = genericShow x"
+              , "derive instance genericFunc :: Generic (Func a) _"
               ]
        in recTypeText `shouldRender` txt
     it "tests the generation of a whole (dummy) module" $
@@ -525,6 +546,7 @@ allTests = do
               , ""
               , "import Data.Either (Either)"
               , "import Data.Generic.Rep (class Generic)"
+              , "import Data.Generic.Rep.Show (genericShow)"
               , "import Data.Maybe (Maybe, Maybe(..))"
               , "import Data.Newtype (class Newtype)"
               , ""
@@ -539,7 +561,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericBar :: (Generic a ra, Generic b rb, Generic (m b) rmb) => Generic (Bar a b m c) _"
+              , "derive instance genericBar :: Generic (Bar a b m c) _"
               ]
        in m `shouldBe` txt
     it "tests generation of newtypes for record data type" $
@@ -558,7 +580,7 @@ allTests = do
               , "      }"
               , ""
               , ""
-              , "derive instance genericSingleRecord :: (Generic a ra, Generic b rb) => Generic (SingleRecord a b) _"
+              , "derive instance genericSingleRecord :: Generic (SingleRecord a b) _"
               , "derive instance newtypeSingleRecord :: Newtype (SingleRecord a b) _"
               ]
        in recTypeText `shouldRender` txt
