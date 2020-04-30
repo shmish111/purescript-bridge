@@ -209,11 +209,24 @@ instances settings st@(SumType t cs is) = go <$> is
     isNoArgConstructor c = (c ^. sigValues) == Left []
     go :: Instance -> Doc
     go Encode =
-      "instance encode" <> name <+> "::" <+> extras encodeInstance <+> "Encode" <+>
-      typeInfoToDoc False t <+>
-      "where" <>
-      linebreak <>
-      indent 2 encodeInstanceBody
+      vsep $
+      [ "instance encode" <> name <+>
+        "::" <+>
+        extras encodeInstance <+>
+        "Encode" <+>
+        typeInfoToDoc False t <+>
+        "where" <> linebreak <> indent 2 encodeInstanceBody
+      ] <>
+      if isJust (nootype cs)
+        then [ "instance toUrlPiece" <> name <+>
+               "::" <+>
+               extras encodeInstance <+>
+               "ToUrlPiece" <+>
+               typeInfoToDoc False t <+>
+               "where" <>
+               linebreak <> indent 2 "toUrlPiece value = toUrlPiece $ unwrap value"
+             ]
+        else []
       where
         encodeInstanceBody =
           "encode value =" <+>
