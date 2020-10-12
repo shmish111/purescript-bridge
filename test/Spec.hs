@@ -317,6 +317,23 @@ allTests = do
               , "--------------------------------------------------------------------------------"
               ]
        in recTypeText `shouldRender` txt
+    it
+      "tests generation for haskell data type with no constructors" $
+      let recType =
+            bridgeSumType
+              (buildBridge defaultBridge)
+              (mkSumType (Proxy :: Proxy VoidType))
+          recTypeText = sumTypeToDoc settings recType
+          txt =
+            T.unlines
+              [ "data VoidType"
+              , ""
+              , ""
+              , "derive instance genericVoidType :: Generic VoidType"
+              , "--------------------------------------------------------------------------------"
+              , "--------------------------------------------------------------------------------"
+              ]
+       in recTypeText `shouldRender` txt
     it "tests generation of newtypes for haskell data type with one argument" $
       let recType =
             bridgeSumType

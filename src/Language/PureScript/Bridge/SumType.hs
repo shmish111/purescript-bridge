@@ -142,6 +142,9 @@ class GDataConstructor f where
 class GRecordEntry f where
   gToRecordEntries :: f a -> [RecordEntry 'Haskell]
 
+instance GDataConstructor V1 where
+  gToConstructors _ = []
+
 instance (Datatype a, GDataConstructor c) => GDataConstructor (D1 a c) where
   gToConstructors (M1 c) = gToConstructors c
 

@@ -64,6 +64,9 @@ data TwoRecords
   , _srd :: [Int]
   } deriving(Generic, Typeable, Show)
 
+data VoidType
+  deriving (Generic, Typeable)
+
 newtype SomeNewtype = SomeNewtype Int
   deriving (Generic, Typeable, Show)
 

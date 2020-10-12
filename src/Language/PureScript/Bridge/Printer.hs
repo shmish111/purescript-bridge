@@ -171,15 +171,17 @@ sumTypeToTypeDecls :: Switches.Settings -> SumType 'PureScript -> Doc
 sumTypeToTypeDecls settings (SumType t cs is) =
   vsep $
   concat
-    [ [ dataOrNewtype <+> typeInfoToDoc True t
-      , indent
+    [ [ dataOrNewtype <+> typeInfoToDoc True t ]
+      -- if there is no constructors, we only generate a left hand side (void-type)
+    , if cs == [] then []
+        else
+        [ indent
           2
           (encloseVsep
-             ("=" <> space)
-             mempty
-             ("|" <> space)
-             (constructorToDoc <$> cs))
-      ]
+            ("=" <> space)
+            mempty
+            ("|" <> space)
+            (constructorToDoc <$> cs))]
     , [line]
     , instances settings (SumType t cs (filter genForeign is))
     ]
@@ -307,7 +309,7 @@ instances settings st@(SumType t cs is) = go <$> is
           | Switches.genericsGenRep settings = " _"
           | otherwise = ""
         postfix _ = ""
-    isEnum = all isNoArgConstructor cs
+    isEnum = cs /= [] && all isNoArgConstructor cs
     isNoArgConstructor c = (c ^. sigValues) == Left []
 
 recordUpdateDoc :: [(Doc, Doc)] -> Doc
