@@ -5,7 +5,8 @@ let
   inherit (nixpkgs) pkgs;
 
   f = { mkDerivation, base, containers, directory, errors, filepath
-      , generic-deriving, lens, mtl, stdenv, text, transformers
+      , generic-deriving, lens, mtl, stdenv, text, transformers, wl-pprint-text
+      , hspec, hspec-expectations-pretty-diff
       }:
       mkDerivation {
         pname = "purescript-bridge";
@@ -13,7 +14,7 @@ let
         src = ./.;
         libraryHaskellDepends = [
           base containers directory errors filepath generic-deriving lens mtl
-          text transformers
+          text transformers wl-pprint-text hspec hspec-expectations-pretty-diff
         ];
         description = "Generate PureScript data types from Haskell data types";
         license = stdenv.lib.licenses.bsd3;
